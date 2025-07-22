@@ -1,7 +1,15 @@
 name: Parallel YouTube Streams
 
 on:
-  workflow_dispatch:
+  on:
+  schedule:
+    - cron: '0 0 * * *'   # 5:30 AM IST
+    - cron: '0 4 * * *'   # 9:30 AM IST
+    - cron: '0 8 * * *'   # 1:30 PM IST
+    - cron: '0 12 * * *'  # 5:30 PM IST
+    - cron: '0 16 * * *'  # 9:30 PM IST
+    - cron: '0 20 * * *'  # 1:30 AM IST
+  workflow_dispatch:      # Manual trigger
 
 jobs:
   stream-1:
