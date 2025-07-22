@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      YOUTUBE_STREAM_KEY: ${{ secrets.YOUTUBE_STREAM_KEY_1 }}
+      YOUTUBE_STREAM_KEY: ${{ secrets.DEEP_MEDITATION }}
 
     steps:
       - name: Set up directories
@@ -44,7 +44,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      YOUTUBE_STREAM_KEY: ${{ secrets.YOUTUBE_STREAM_KEY_2 }}
+      YOUTUBE_STREAM_KEY: ${{ secrets.YOUTUBE_STREAM_KEY_1 }}
 
     steps:
       - name: Set up directories
