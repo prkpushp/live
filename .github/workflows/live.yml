@@ -1,69 +1,75 @@
-name: Stream 2 Live Videos in Parallel
+name: Parallel YouTube Streams
 
 on:
-  workflow_dispatch:  # Manual trigger
-  schedule:
-    - cron: '0 22 * * *' # Runs daily at 3:30 AM IST
+  workflow_dispatch:
 
 jobs:
-  stream-one:
-    name: Stream Video 1 (YOUTUBE_STREAM_KEY_1)
+  stream-1:
+    name: Stream DEEP_MEDITATION
     runs-on: ubuntu-latest
     env:
-      STREAM_KEY: ${{ secrets.YOUTUBE_STREAM_KEY_1 }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      YOUTUBE_STREAM_KEY: ${{ secrets.YOUTUBE_STREAM_KEY_1 }}
 
     steps:
-      - name: Download artifact from run #16392978905
+      - name: Set up directories
+        run: mkdir -p stream1
+
+      - name: Download artifact for DEEP_MEDITATION
         run: |
-          mkdir -p stream1
-          curl -L \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -o artifact1.zip \
-            "https://api.github.com/repos/prkpushp/animated/actions/runs/16392978905/artifacts" \
-            | jq -r '.artifacts[0].archive_download_url' \
-            | xargs curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -o artifact1.zip
+          ARTIFACTS_JSON=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/repos/prkpushp/animated/actions/runs/16428764736/artifacts)
+
+          ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].archive_download_url')
+
+          curl -L -H "Authorization: token $GITHUB_TOKEN" \
+            -o artifact1.zip "$ARTIFACT_URL"
 
           unzip artifact1.zip -d stream1
 
       - name: Install FFmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Start Streaming Video 1
+      - name: Start streaming to YouTube Live (DEEP_MEDITATION)
         run: |
-          VIDEO_FILE=$(find stream1 -type f -name "*.mp4" | head -n 1)
-          echo "🎬 Streaming $VIDEO_FILE..."
+          VIDEO_FILE=$(find stream1 -type f -name '*.mp4' | head -n 1)
+          echo "🔴 Streaming $VIDEO_FILE to YouTube..."
           ffmpeg -re -stream_loop -1 -i "$VIDEO_FILE" \
             -c:v libx264 -preset veryfast -maxrate 3000k -bufsize 6000k \
             -pix_fmt yuv420p -g 50 -c:a aac -b:a 160k -ar 44100 \
-            -f flv "rtmp://a.rtmp.youtube.com/live2/$STREAM_KEY"
+            -f flv "rtmp://a.rtmp.youtube.com/live2/$YOUTUBE_STREAM_KEY"
 
-  stream-two:
-    name: Stream Video 2 (DEEP_MEDITATION)
+  stream-2:
+    name: Stream Other Meditation
     runs-on: ubuntu-latest
     env:
-      STREAM_KEY: ${{ secrets.DEEP_MEDITATION }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      YOUTUBE_STREAM_KEY: ${{ secrets.YOUTUBE_STREAM_KEY_2 }}
 
     steps:
-      - name: Download artifact from run #16428764736
+      - name: Set up directories
+        run: mkdir -p stream2
+
+      - name: Download artifact for OTHER
         run: |
-          mkdir -p stream2
-          curl -L \
-            -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            -o artifact2.zip \
-            "https://api.github.com/repos/prkpushp/animated/actions/runs/16428764736/artifacts" \
-            | jq -r '.artifacts[0].archive_download_url' \
-            | xargs curl -L -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" -o artifact2.zip
+          ARTIFACTS_JSON=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/repos/prkpushp/animated/actions/runs/16392978905/artifacts)
+
+          ARTIFACT_URL=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].archive_download_url')
+
+          curl -L -H "Authorization: token $GITHUB_TOKEN" \
+            -o artifact2.zip "$ARTIFACT_URL"
 
           unzip artifact2.zip -d stream2
 
       - name: Install FFmpeg
         run: sudo apt-get update && sudo apt-get install -y ffmpeg
 
-      - name: Start Streaming Video 2
+      - name: Start streaming to YouTube Live (OTHER)
         run: |
-          VIDEO_FILE=$(find stream2 -type f -name "*.mp4" | head -n 1)
-          echo "🎬 Streaming $VIDEO_FILE..."
+          VIDEO_FILE=$(find stream2 -type f -name '*.mp4' | head -n 1)
+          echo "🔴 Streaming $VIDEO_FILE to YouTube..."
           ffmpeg -re -stream_loop -1 -i "$VIDEO_FILE" \
             -c:v libx264 -preset veryfast -maxrate 3000k -bufsize 6000k \
             -pix_fmt yuv420p -g 50 -c:a aac -b:a 160k -ar 44100 \
-            -f flv "rtmp://a.rtmp.youtube.com/live2/$STREAM_KEY"
+            -f flv "rtmp://a.rtmp.youtube.com/live2/$YOUTUBE_STREAM_KEY"
