@@ -1,4 +1,4 @@
-name: Parallel YouTube Streams
+name: Parallel Streams
 
 on:
   schedule:
